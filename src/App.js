@@ -11,7 +11,7 @@ function App() {
     { name: "hmmm...?", id: "Taylor", phone: "123-456-7890" },
   ]);
   const [newPerson, setNewName] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("some error");
+  const [errorMessage, setErrorMessage] = useState(null);
   const [notificationStyle, setNotificationStyle] = useState("null");
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function App() {
     const personObj = {
       name: newPerson.name,
       id: Math.floor(Math.random() * 999999),
-      phone: newPerson.phone,
+      number: newPerson.phone,
     };
 
     let personResponse = undefined;
