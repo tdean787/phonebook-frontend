@@ -8,15 +8,14 @@ import Persons from "./components/Persons";
 
 function App() {
   const [persons, setPersons] = useState([
-    { name: "hmmm...?", id: "Taylor", phone: "123-456-7890" },
+    { name: "missing api", id: "Taylor", phone: "123-456-7890" },
   ]);
   const [newPerson, setNewName] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [notificationStyle, setNotificationStyle] = useState("null");
+  const [notificationStyle, setNotificationStyle] = useState("error");
 
   useEffect(() => {
     personService.getAll().then((response) => {
-      console.log(response.data);
       setPersons(response.data);
     });
   }, []);
@@ -26,39 +25,34 @@ function App() {
     const checkName = persons.map((person) => person.name);
     const personObj = {
       name: newPerson.name,
-      id: Math.floor(Math.random() * 999999),
       number: newPerson.phone,
     };
-
-    let personResponse = undefined;
 
     if (checkName.includes(newPerson.name)) {
       if (
         window.confirm(`${newPerson.name} already in phonebook. Update number?`)
       ) {
-        console.log(persons);
         let personMatch = persons.find(
           (person) => person.name === newPerson.name
         );
-        console.log(personMatch);
-
-        console.log(personMatch[0].id);
-
-        console.log(personObj);
+        // console.log(personMatch);
         axios
-          .put(`/api/phonebook/${personMatch[0].id}`, personObj)
+          .put(`/api/phonebook/${personMatch.id}`, personObj)
           .then((response) => {
-            personResponse = response.data;
+            console.log(response.data);
             axios.get("/api/phonebook").then((res) => setPersons(res.data));
           })
           .catch(() => {
-            setErrorMessage("The person was already deleted from server");
+            setErrorMessage(`${personObj.name} had their number updated`);
             setNotificationStyle("confirmed");
+            debugger;
             setTimeout(() => {
               setErrorMessage(null);
             }, 2000);
           });
-        setErrorMessage("Number was updated");
+        setErrorMessage(
+          `Number of ${personObj.name} was updated to ${personObj.number}`
+        );
         setNotificationStyle("confirmed");
         setTimeout(() => {
           setErrorMessage(null);
@@ -73,6 +67,7 @@ function App() {
         setNewName("");
         setErrorMessage("Person Added");
         setNotificationStyle("confirmed");
+        // debugger;
         setTimeout(() => {
           setErrorMessage(null);
         }, 2000);
@@ -90,13 +85,20 @@ function App() {
 
   const deletePerson = (id, name) => {
     if (window.confirm(`Do you really want to delete?`)) {
-      axios.delete(`/api/phonebook/${id}`).then((response) => {
-        console.log(response);
-        setPersons(persons.filter((person) => person.id !== id));
-      });
+      axios
+        .delete(`/api/phonebook/${id}`)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => console.log(err));
+
+      personService.getAll().then((response) => setPersons(response.data));
+
       setErrorMessage(`${name} was deleted`);
-      setNotificationStyle("confirmed");
+      setNotificationStyle("deleted");
+
       setTimeout(() => {
+        debugger;
         setErrorMessage(null);
       }, 2000);
     } else {
