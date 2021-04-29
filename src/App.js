@@ -10,7 +10,10 @@ function App() {
   const [persons, setPersons] = useState([
     { name: "missing api", id: "Taylor", phone: "123-456-7890" },
   ]);
-  const [newPerson, setNewName] = useState([]);
+  const [newPerson, setNewName] = useState({
+    name: undefined,
+    number: undefined,
+  });
   const [errorMessage, setErrorMessage] = useState(null);
   const [notificationStyle, setNotificationStyle] = useState("error");
 
@@ -28,6 +31,11 @@ function App() {
       number: newPerson.phone,
     };
 
+    if (!newPerson.name) {
+      console.log("no name");
+      alert("You need to enter a name");
+      return;
+    }
     if (checkName.includes(newPerson.name)) {
       if (
         window.confirm(`${newPerson.name} already in phonebook. Update number?`)
@@ -45,7 +53,6 @@ function App() {
           .catch(() => {
             setErrorMessage(`${personObj.name} had their number updated`);
             setNotificationStyle("confirmed");
-            debugger;
             setTimeout(() => {
               setErrorMessage(null);
             }, 2000);
@@ -60,11 +67,15 @@ function App() {
       }
 
       return;
-      //below condition will run if person does not match
+      //below condition will run if no match and add person to database
     } else {
       axios.post("/api/phonebook", personObj).then((response) => {
         setPersons(persons.concat(personObj));
-        setNewName("");
+
+        setNewName({
+          name: "",
+          number: "",
+        });
         setErrorMessage("Person Added");
         setNotificationStyle("confirmed");
         // debugger;
@@ -80,7 +91,7 @@ function App() {
   };
 
   const phoneChange = (event) => {
-    setNewName({ ...newPerson, phone: event.target.value });
+    setNewName({ ...newPerson, number: event.target.value });
   };
 
   const deletePerson = (id, name) => {
@@ -94,11 +105,10 @@ function App() {
 
       personService.getAll().then((response) => setPersons(response.data));
 
-      setErrorMessage(`${name} was deleted`);
+      setErrorMessage(`${name} was deleted. See ya, ${name}!`);
       setNotificationStyle("deleted");
 
       setTimeout(() => {
-        debugger;
         setErrorMessage(null);
       }, 2000);
     } else {
@@ -112,6 +122,8 @@ function App() {
         addPerson={addPerson}
         personChange={personChange}
         phoneChange={phoneChange}
+        newPerson={newPerson}
+        setNewName={setNewName}
       />
       <Notification
         notificationStyle={notificationStyle}
